@@ -8757,6 +8757,9 @@ body::after {
   }
 }
 
+.item-cart.hidden {
+  display: none;
+}
 @media (min-width: 109.375em) {
   .item-cart:not(:last-child) {
     margin-bottom: 1.875rem;

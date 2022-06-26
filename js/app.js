@@ -5857,59 +5857,51 @@
                 }));
             }
         }));
-        const totalPriceWrapper = document.getElementById("total-price");
-        if (totalPriceWrapper) {
-            const formatNumber = x => x.toString().replace(/\B(?<!\.\d*)(?=(\d{2})+(?!\d))/g, "");
-            const ACTION = {
-                PLUS: "plus",
-                MINUS: "minus"
-            };
-            const getItemSubTotalPrice = input => Number(input.value) * Number(input.dataset.price);
-            const setTotalPrice = value => {
-                totalPriceWrapper.textContent = formatNumber(value);
-                totalPriceWrapper.dataset.value = value;
-            };
-            const init = () => {
-                let totalCost = 0;
-                [ ...document.querySelectorAll(".item-cart") ].forEach((basketItem => {
-                    totalCost += getItemSubTotalPrice(basketItem.querySelector(".input"));
-                }));
-                setTotalPrice(totalCost);
-            };
-            const calculateSeparateItem = (basketItem, action) => {
-                const input = basketItem.querySelector(".input");
-                switch (action) {
-                  case ACTION.PLUS:
-                    input.value++;
-                    setTotalPrice(Number(totalPriceWrapper.dataset.value) + Number(input.dataset.price));
-                    break;
-
-                  case ACTION.MINUS:
-                    setTotalPrice(Number(totalPriceWrapper.dataset.value) - Number(input.dataset.price));
-                    input.value--;
-                    break;
-                }
-                basketItem.querySelector(".subtotal").textContent = formatNumber(getItemSubTotalPrice(input));
-            };
-            document.getElementById("backet").addEventListener("click", (event => {
-                if (event.target.classList.contains("my-quantity__button_minus")) {
-                    const input = event.target.closest(".item-cart").querySelector(".input");
-                    if (0 !== Number(input.value)) calculateSeparateItem(event.target.closest(".item-cart"), ACTION.MINUS);
-                }
-                if (event.target.classList.contains("my-quantity__button_plus")) calculateSeparateItem(event.target.closest(".item-cart"), ACTION.PLUS);
-                if (event.target.closest(".item-cart__delete")) {
-                    event.target.closest(".item-cart").classList.add("_delete");
-                    let itemSummNumber = Number(document.querySelector(".subtotal").textContent);
-                    let itemsSummNumber = Number(document.getElementById("total-price").textContent);
-                    let result = itemsSummNumber - itemSummNumber;
-                    totalPriceWrapper.textContent = result;
-                    if (totalPriceWrapper.textContent <= 0) totalPriceWrapper.textContent = 0;
-                    console.log(itemsSummNumber);
-                    console.log(itemSummNumber);
-                    event.preventDefault();
-                }
+        const cartElemens = document.querySelectorAll(".item-cart");
+        const plustElements = document.querySelectorAll(".my-quantity__button_plus");
+        const minustElements = document.querySelectorAll(".my-quantity__button_minus");
+        let totalSum = document.getElementById("total-price");
+        for (let index = 0; index < cartElemens.length; index++) {
+            const element = cartElemens[index];
+            let itemTotal = element.querySelector(".subtotal");
+            let counter = element.querySelector("input");
+            const price = Number(counter.dataset.price);
+            let counterInciment = Number(counter.value++);
+            itemTotal.textContent = (counterInciment + 1) * price;
+            totalSum.textContent = Number(totalSum.textContent) + Number(itemTotal.textContent);
+            const deleteBtn = element.querySelector(".item-cart__delete");
+            deleteBtn.addEventListener("click", (function() {
+                totalSum.textContent = Number(totalSum.textContent) - Number(itemTotal.textContent);
+                element.classList.add("hidden");
             }));
-            init();
+        }
+        for (let index = 0; index < plustElements.length; index++) {
+            const plus = plustElements[index];
+            plus.addEventListener("click", (function() {
+                const item = plus.closest(".item-cart");
+                const minus = item.querySelector(".my-quantity__button_minus");
+                let itemTotal = item.querySelector(".subtotal");
+                let counter = item.querySelector("input");
+                const price = Number(counter.dataset.price);
+                let counterInciment = Number(counter.value++);
+                itemTotal.textContent = (counterInciment + 1) * price;
+                totalSum.textContent = Number(totalSum.textContent) + price;
+                if (counterInciment > -1) minus.disabled = false;
+            }));
+        }
+        for (let index = 0; index < minustElements.length; index++) {
+            const minus = minustElements[index];
+            minus.addEventListener("click", (function() {
+                const item = minus.closest(".item-cart");
+                let itemTotal = item.querySelector(".subtotal");
+                let counter = item.querySelector("input");
+                const price = Number(counter.dataset.price);
+                let counterInciment = Number(counter.value--);
+                itemTotal.textContent = (counterInciment - 1) * price;
+                totalSum.textContent = Number(totalSum.textContent) - price;
+                minus.disabled = false;
+                if (1 === counterInciment) minus.disabled = true;
+            }));
         }
         window["FLS"] = true;
         isWebp();
